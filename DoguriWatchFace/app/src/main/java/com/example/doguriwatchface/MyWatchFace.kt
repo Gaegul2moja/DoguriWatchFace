@@ -413,20 +413,27 @@ class MyWatchFace : CanvasWatchFaceService() {
                     null
             )
 
-            canvas.drawLine(
-                    mCenterX,
-                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-                    mCenterX,
-                    mCenterY - sHourHandLength,
-                    mHourPaint)
+//            canvas.drawLine(
+//                    mCenterX,
+//                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
+//                    mCenterX,
+//                    mCenterY - sHourHandLength,
+//                    mHourPaint)
 
             canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY)
-            canvas.drawLine(
-                    mCenterX,
-                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-                    mCenterX,
-                    mCenterY - sMinuteHandLength,
-                    mMinutePaint)
+            val scaledMinuteBitmap =  BitmapFactory.decodeResource(resources, R.drawable.minutehand)
+            canvas.drawBitmap(
+                scaledMinuteBitmap,
+                mCenterX - (scaledMinuteBitmap.width / 2),
+                mCenterY - scaledMinuteBitmap.height,
+                null
+            )
+//            canvas.drawLine(
+//                    mCenterX,
+//                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
+//                    mCenterX,
+//                    mCenterY - sMinuteHandLength,
+//                    mMinutePaint)
 
             /*
              * Ensure the "seconds" hand is drawn only when we are in interactive mode.
@@ -434,19 +441,26 @@ class MyWatchFace : CanvasWatchFaceService() {
              */
             if (!mAmbient) {
                 canvas.rotate(secondsRotation - minutesRotation, mCenterX, mCenterY)
-                canvas.drawLine(
-                        mCenterX,
-                        mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-                        mCenterX,
-                        mCenterY - mSecondHandLength,
-                        mSecondPaint)
+//                canvas.drawLine(
+//                        mCenterX,
+//                        mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
+//                        mCenterX,
+//                        mCenterY - mSecondHandLength,
+//                        mSecondPaint)
+                val scaledSecondBitmap =  BitmapFactory.decodeResource(resources, R.drawable.secondhand)
+                canvas.drawBitmap(
+                    scaledSecondBitmap,
+                    mCenterX - (scaledSecondBitmap.width / 2),
+                    mCenterY - scaledSecondBitmap.height,
+                    null
+                )
 
             }
-            canvas.drawCircle(
-                    mCenterX,
-                    mCenterY,
-                    CENTER_GAP_AND_CIRCLE_RADIUS,
-                    mTickAndCirclePaint)
+//            canvas.drawCircle(
+//                    mCenterX,
+//                    mCenterY,
+//                    CENTER_GAP_AND_CIRCLE_RADIUS,
+//                    mTickAndCirclePaint)
 
             /* Restore the canvas" original orientation. */
             canvas.restore()

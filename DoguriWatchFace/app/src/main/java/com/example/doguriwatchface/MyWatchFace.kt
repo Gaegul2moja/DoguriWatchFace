@@ -102,11 +102,13 @@ class MyWatchFace : CanvasWatchFaceService() {
 
         private lateinit var mBackgroundPaint: Paint
         private lateinit var mBackgroundBitmap: Bitmap
+        private lateinit var mAmbientBackgroundBitmap: Bitmap
         private lateinit var mGrayBackgroundBitmap: Bitmap
 
         private var mAmbient: Boolean = false
         private var mLowBitAmbient: Boolean = false
         private var mBurnInProtection: Boolean = false
+        private var mScale: Float = 0F
 
         /* Handler to update the time once a second in interactive mode. */
         private val mUpdateTimeHandler = EngineHandler(this)
@@ -136,6 +138,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 color = Color.BLACK
             }
             mBackgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.watchface_service_bg)
+            mAmbientBackgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.watchface_service_ambient_bg)
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from(mBackgroundBitmap).generate {
@@ -292,11 +295,17 @@ class MyWatchFace : CanvasWatchFaceService() {
             sHourHandLength = (mCenterX * 0.5).toFloat()
 
             /* Scale loaded background image (more efficient) if surface dimensions change. */
-            val scale = width.toFloat() / mBackgroundBitmap.width.toFloat()
+            mScale = (width.toFloat() / mBackgroundBitmap.width.toFloat())
 
             mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
-                    (mBackgroundBitmap.width * scale).toInt(),
-                    (mBackgroundBitmap.height * scale).toInt(), true)
+                    (mBackgroundBitmap.width * mScale).toInt(),
+                    (mBackgroundBitmap.height * mScale).toInt(), true)
+
+            val ambientScale = width.toFloat() / mAmbientBackgroundBitmap.width.toFloat()
+
+            mAmbientBackgroundBitmap = Bitmap.createScaledBitmap(mAmbientBackgroundBitmap,
+                (mAmbientBackgroundBitmap.width * ambientScale).toInt(),
+                (mAmbientBackgroundBitmap.height * ambientScale).toInt(), true)
 
             /*
              * Create a gray version of the image only if it will look nice on the device in
@@ -315,8 +324,8 @@ class MyWatchFace : CanvasWatchFaceService() {
 
         private fun initGrayBackgroundBitmap() {
             mGrayBackgroundBitmap = Bitmap.createBitmap(
-                    mBackgroundBitmap.width,
-                    mBackgroundBitmap.height,
+                    mAmbientBackgroundBitmap.width,
+                    mAmbientBackgroundBitmap.height,
                     Bitmap.Config.ARGB_8888)
             val canvas = Canvas(mGrayBackgroundBitmap)
             val grayPaint = Paint()
@@ -324,7 +333,7 @@ class MyWatchFace : CanvasWatchFaceService() {
             colorMatrix.setSaturation(0f)
             val filter = ColorMatrixColorFilter(colorMatrix)
             grayPaint.colorFilter = filter
-            canvas.drawBitmap(mBackgroundBitmap, 0f, 0f, grayPaint)
+            canvas.drawBitmap(mAmbientBackgroundBitmap, 0f, 0f, grayPaint)
         }
 
         /**
@@ -405,7 +414,11 @@ class MyWatchFace : CanvasWatchFaceService() {
             canvas.save()
 
             canvas.rotate(hoursRotation, mCenterX, mCenterY)
-            val scaledHourBitmap =  BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+            val hourBitmap = BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+            val scaledHourBitmap =  Bitmap.createScaledBitmap(hourBitmap,
+                (hourBitmap.width * mScale).toInt(), (hourBitmap.height * mScale).toInt(), true)
+//            val scaledHourBitmap =  BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+
             canvas.drawBitmap(
                     scaledHourBitmap,
                     mCenterX - (scaledHourBitmap.width / 2),
@@ -421,7 +434,9 @@ class MyWatchFace : CanvasWatchFaceService() {
 //                    mHourPaint)
 
             canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY)
-            val scaledMinuteBitmap =  BitmapFactory.decodeResource(resources, R.drawable.minutehand)
+            val minuteBitmap = BitmapFactory.decodeResource(resources, R.drawable.minutehand)
+            val scaledMinuteBitmap =  Bitmap.createScaledBitmap(minuteBitmap,
+                (minuteBitmap.width * mScale).toInt(), (minuteBitmap.height * mScale).toInt(), true)
             canvas.drawBitmap(
                 scaledMinuteBitmap,
                 mCenterX - (scaledMinuteBitmap.width / 2),
@@ -447,7 +462,9 @@ class MyWatchFace : CanvasWatchFaceService() {
 //                        mCenterX,
 //                        mCenterY - mSecondHandLength,
 //                        mSecondPaint)
-                val scaledSecondBitmap =  BitmapFactory.decodeResource(resources, R.drawable.secondhand)
+                val secondBitmap = BitmapFactory.decodeResource(resources, R.drawable.secondhand)
+                val scaledSecondBitmap =  Bitmap.createScaledBitmap(secondBitmap,
+                    (secondBitmap.width * mScale).toInt(), (secondBitmap.height * mScale).toInt(), true)
                 canvas.drawBitmap(
                     scaledSecondBitmap,
                     mCenterX - (scaledSecondBitmap.width / 2),

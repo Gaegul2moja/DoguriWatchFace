@@ -131,7 +131,7 @@ class MyWatchFace : CanvasWatchFaceService() {
             Palette.from(mCriteriaBitmap).generate {
                 it?.let {
                     mWatchHandHighlightColor = it.getVibrantColor(Color.RED)
-                    mWatchHandColor = it.getLightVibrantColor(Color.WHITE)
+                    mWatchHandColor = Color.WHITE
                     mWatchHandShadowColor = it.getDarkMutedColor(Color.BLACK)
                     updateWatchHandStyle()
                 }

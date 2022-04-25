@@ -29,11 +29,7 @@ private const val INTERACTIVE_UPDATE_RATE_MS = 1000
  */
 private const val MSG_UPDATE_TIME = 0
 
-private const val HOUR_STROKE_WIDTH = 5f
-private const val MINUTE_STROKE_WIDTH = 3f
 private const val SECOND_TICK_STROKE_WIDTH = 2f
-
-private const val CENTER_GAP_AND_CIRCLE_RADIUS = 4f
 
 private const val SHADOW_RADIUS = 6f
 
@@ -78,18 +74,11 @@ class MyWatchFace : CanvasWatchFaceService() {
         private var mCenterX: Float = 0F
         private var mCenterY: Float = 0F
 
-        private var mSecondHandLength: Float = 0F
-        private var sMinuteHandLength: Float = 0F
-        private var sHourHandLength: Float = 0F
-
         /* Colors for all hands (hour, minute, seconds, ticks) based on photo loaded. */
         private var mWatchHandColor: Int = 0
         private var mWatchHandHighlightColor: Int = 0
         private var mWatchHandShadowColor: Int = 0
 
-        private lateinit var mHourPaint: Paint
-        private lateinit var mMinutePaint: Paint
-        private lateinit var mSecondPaint: Paint
         private lateinit var mTickAndCirclePaint: Paint
 
         private lateinit var mBackgroundPaint: Paint
@@ -155,33 +144,6 @@ class MyWatchFace : CanvasWatchFaceService() {
             mWatchHandHighlightColor = Color.RED
             mWatchHandShadowColor = Color.BLACK
 
-            mHourPaint = Paint().apply {
-                color = mWatchHandColor
-                strokeWidth = HOUR_STROKE_WIDTH
-                isAntiAlias = true
-                strokeCap = Paint.Cap.ROUND
-                setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
-            }
-
-            mMinutePaint = Paint().apply {
-                color = mWatchHandColor
-                strokeWidth = MINUTE_STROKE_WIDTH
-                isAntiAlias = true
-                strokeCap = Paint.Cap.ROUND
-                setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
-            }
-
-            mSecondPaint = Paint().apply {
-                color = mWatchHandHighlightColor
-                strokeWidth = SECOND_TICK_STROKE_WIDTH
-                isAntiAlias = true
-                strokeCap = Paint.Cap.ROUND
-                setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
-            }
-
             mTickAndCirclePaint = Paint().apply {
                 color = mWatchHandColor
                 strokeWidth = SECOND_TICK_STROKE_WIDTH
@@ -227,38 +189,13 @@ class MyWatchFace : CanvasWatchFaceService() {
 
         private fun updateWatchHandStyle() {
             if (mAmbient) {
-                mHourPaint.color = Color.WHITE
-                mMinutePaint.color = Color.WHITE
-                mSecondPaint.color = Color.WHITE
                 mTickAndCirclePaint.color = Color.WHITE
-
-                mHourPaint.isAntiAlias = false
-                mMinutePaint.isAntiAlias = false
-                mSecondPaint.isAntiAlias = false
                 mTickAndCirclePaint.isAntiAlias = false
-
-                mHourPaint.clearShadowLayer()
-                mMinutePaint.clearShadowLayer()
-                mSecondPaint.clearShadowLayer()
                 mTickAndCirclePaint.clearShadowLayer()
-
             } else {
-                mHourPaint.color = mWatchHandColor
-                mMinutePaint.color = mWatchHandColor
-                mSecondPaint.color = mWatchHandHighlightColor
                 mTickAndCirclePaint.color = mWatchHandColor
 
-                mHourPaint.isAntiAlias = true
-                mMinutePaint.isAntiAlias = true
-                mSecondPaint.isAntiAlias = true
                 mTickAndCirclePaint.isAntiAlias = true
-
-                mHourPaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
-                mMinutePaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
-                mSecondPaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
                 mTickAndCirclePaint.setShadowLayer(
                         SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
             }
@@ -271,9 +208,6 @@ class MyWatchFace : CanvasWatchFaceService() {
             /* Dim display in mute mode. */
             if (mMuteMode != inMuteMode) {
                 mMuteMode = inMuteMode
-                mHourPaint.alpha = if (inMuteMode) 100 else 255
-                mMinutePaint.alpha = if (inMuteMode) 100 else 255
-                mSecondPaint.alpha = if (inMuteMode) 80 else 255
                 invalidate()
             }
         }
@@ -288,13 +222,6 @@ class MyWatchFace : CanvasWatchFaceService() {
              */
             mCenterX = width / 2f
             mCenterY = height / 2f
-
-            /*
-             * Calculate lengths of different hands based on watch screen size.
-             */
-            mSecondHandLength = (mCenterX * 0.875).toFloat()
-            sMinuteHandLength = (mCenterX * 0.75).toFloat()
-            sHourHandLength = (mCenterX * 0.5).toFloat()
 
             /* Scale loaded background image (more efficient) if surface dimensions change. */
             mScale = (width.toFloat() / mCriteriaBitmap.width.toFloat())
@@ -372,7 +299,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 canvas.drawBitmap(mBackgroundBitmap, 0f, 0f, mBackgroundPaint)
 
                 if (isDigitalClockOn) {
-                    val date = SimpleDateFormat("M/dd")
+                    val date = SimpleDateFormat("MM/dd")
                     val time = SimpleDateFormat("hh:mm")
                     val currentDate = date.format(Date())
                     val currentTime = time.format(Date())
@@ -384,6 +311,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                     paint.typeface = ResourcesCompat.getFont(applicationContext, R.font.hs_uji)
                     canvas.drawText(currentDate, mCenterX, mCenterY + 65F, paint)
                     paint.textSize = 28F
+                    paint.isAntiAlias = false
                     canvas.drawText(currentTime, mCenterX, mCenterY + 90F, paint)
                 }
             }

@@ -97,6 +97,9 @@ class MyWatchFace : CanvasWatchFaceService() {
         private lateinit var mCriteriaBitmap: Bitmap
         private lateinit var mAmbientBackgroundBitmap: Bitmap
         private lateinit var mGrayBackgroundBitmap: Bitmap
+        private lateinit var mHourBitmap: Bitmap
+        private lateinit var mMinuteBitmap: Bitmap
+        private lateinit var mSecondBitmap: Bitmap
 
         private var mAmbient: Boolean = false
         private var mLowBitAmbient: Boolean = false
@@ -134,8 +137,6 @@ class MyWatchFace : CanvasWatchFaceService() {
 
             mCriteriaBitmap =
                 BitmapFactory.decodeResource(resources, R.drawable.watchface_service_bg)
-//            mBackgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.watchface_service_bg)
-//            mAmbientBackgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.watchface_service_ambient_bg)
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from(mCriteriaBitmap).generate {
@@ -189,6 +190,10 @@ class MyWatchFace : CanvasWatchFaceService() {
                 setShadowLayer(
                         SHADOW_RADIUS, 0f, 0f, mWatchHandShadowColor)
             }
+
+            mHourBitmap = BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+            mMinuteBitmap = BitmapFactory.decodeResource(resources, R.drawable.minutehand)
+            mSecondBitmap = BitmapFactory.decodeResource(resources, R.drawable.secondhand)
         }
 
         override fun onDestroy() {
@@ -299,14 +304,6 @@ class MyWatchFace : CanvasWatchFaceService() {
                     (backgroundBitmap.width * mScale).toInt(),
                     (backgroundBitmap.height * mScale).toInt(), true)
 
-//            val ambientScale = width.toFloat() / mAmbientBackgroundBitmap.width.toFloat()
-
-//            mAmbientBackgroundBitmap = Bitmap.createBitmap(
-//                (mBackgroundBitmap.width * mScale).toInt(),
-//                (mBackgroundBitmap.height * mScale).toInt(), true)
-
-
-
             /*
              * Create a gray version of the image only if it will look nice on the device in
              * ambient mode. That means we don"t want devices that support burn-in
@@ -352,7 +349,6 @@ class MyWatchFace : CanvasWatchFaceService() {
                 }
                 WatchFaceService.TAP_TYPE_TAP ->
                     // The user has completed the tap gesture.
-                    // TODO: Add code to handle the tap gesture.
                     isDigitalClockOn = !isDigitalClockOn
             }
             invalidate()
@@ -437,13 +433,14 @@ class MyWatchFace : CanvasWatchFaceService() {
             grayPaint?.colorFilter = filter
             if (!mAmbient) {
                 grayPaint = null
+            } else {
+                canvas.drawARGB(190, 0, 0, 0)
             }
 
             canvas.rotate(hoursRotation, mCenterX, mCenterY)
-            val hourBitmap = BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+            val hourBitmap = mHourBitmap
             val scaledHourBitmap =  Bitmap.createScaledBitmap(hourBitmap,
-                (hourBitmap.width * mScale).toInt(), (hourBitmap.height * mScale).toInt(), true)
-//            val scaledHourBitmap =  BitmapFactory.decodeResource(resources, R.drawable.hourhand)
+                (mHourBitmap.width * mScale).toInt(), (mHourBitmap.height * mScale).toInt(), true)
 
             canvas.drawBitmap(
                     scaledHourBitmap,
@@ -452,29 +449,16 @@ class MyWatchFace : CanvasWatchFaceService() {
                 grayPaint
             )
 
-//            canvas.drawLine(
-//                    mCenterX,
-//                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-//                    mCenterX,
-//                    mCenterY - sHourHandLength,
-//                    mHourPaint)
-
             canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY)
-            val minuteBitmap = BitmapFactory.decodeResource(resources, R.drawable.minutehand)
+            val minuteBitmap = mMinuteBitmap
             val scaledMinuteBitmap =  Bitmap.createScaledBitmap(minuteBitmap,
-                (minuteBitmap.width * mScale).toInt(), (minuteBitmap.height * mScale).toInt(), true)
+                (mMinuteBitmap.width * mScale).toInt(), (mMinuteBitmap.height * mScale).toInt(), true)
             canvas.drawBitmap(
                 scaledMinuteBitmap,
                 mCenterX - (scaledMinuteBitmap.width / 2),
                 mCenterY - scaledMinuteBitmap.height,
                 grayPaint
             )
-//            canvas.drawLine(
-//                    mCenterX,
-//                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-//                    mCenterX,
-//                    mCenterY - sMinuteHandLength,
-//                    mMinutePaint)
 
             /*
              * Ensure the "seconds" hand is drawn only when we are in interactive mode.
@@ -482,15 +466,10 @@ class MyWatchFace : CanvasWatchFaceService() {
              */
             if (!mAmbient) {
                 canvas.rotate(secondsRotation - minutesRotation, mCenterX, mCenterY)
-//                canvas.drawLine(
-//                        mCenterX,
-//                        mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-//                        mCenterX,
-//                        mCenterY - mSecondHandLength,
-//                        mSecondPaint)
-                val secondBitmap = BitmapFactory.decodeResource(resources, R.drawable.secondhand)
+
+                val secondBitmap = mSecondBitmap
                 val scaledSecondBitmap =  Bitmap.createScaledBitmap(secondBitmap,
-                    (secondBitmap.width * mScale).toInt(), (secondBitmap.height * mScale).toInt(), true)
+                    (mSecondBitmap.width * mScale).toInt(), (mSecondBitmap.height * mScale).toInt(), true)
                 canvas.drawBitmap(
                     scaledSecondBitmap,
                     mCenterX - (scaledSecondBitmap.width / 2),
@@ -498,14 +477,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                     null
                 )
 
-            } else {
-                canvas.drawARGB(130, 0, 0, 0)
             }
-//            canvas.drawCircle(
-//                    mCenterX,
-//                    mCenterY,
-//                    CENTER_GAP_AND_CIRCLE_RADIUS,
-//                    mTickAndCirclePaint)
 
             /* Restore the canvas" original orientation. */
             canvas.restore()

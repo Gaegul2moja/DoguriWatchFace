@@ -11,6 +11,7 @@ import android.os.Message
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
+import android.util.DisplayMetrics
 import android.view.SurfaceHolder
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
@@ -338,8 +339,9 @@ class MyWatchFace : CanvasWatchFaceService() {
                                 "잠금화면 도구리가 \n눈을 떴습니다"
                             }
                         Toast.makeText(applicationContext, txt, Toast.LENGTH_SHORT).show()
+                    } else {
+                        isDigitalClockOn = !isDigitalClockOn
                     }
-                    isDigitalClockOn = !isDigitalClockOn
                 }
             }
             invalidate()
@@ -385,13 +387,13 @@ class MyWatchFace : CanvasWatchFaceService() {
                     val paint = Paint()
                     paint.style = Paint.Style.FILL
                     paint.color = (Color.parseColor("#5d332b"))
-                    paint.textSize = 14F
+                    paint.textSize = dpToPx(10F)
                     paint.textAlign = Paint.Align.CENTER
                     paint.typeface = ResourcesCompat.getFont(applicationContext, R.font.hs_uji)
-                    canvas.drawText(currentDate, mCenterX, mCenterY + 30F, paint)
-                    paint.textSize = 18F
+                    canvas.drawText(currentDate, mCenterX, mCenterY + dpToPx(18F), paint)
+                    paint.textSize = dpToPx(13F)
                     paint.isAntiAlias = false
-                    canvas.drawText(currentTime, mCenterX, mCenterY + 48F, paint)
+                    canvas.drawText(currentTime, mCenterX, mCenterY + dpToPx(30F), paint)
                 }
             }
         }
@@ -406,6 +408,11 @@ class MyWatchFace : CanvasWatchFaceService() {
             } else {
                 Bitmap.createScaledBitmap(originalBitmap, (originalBitmap.width * mScale).toInt(), (originalBitmap.height * mScale).toInt(), true)
             }
+        }
+
+        private fun dpToPx(dp: Float): Float {
+            val density = applicationContext.resources.displayMetrics.densityDpi
+            return dp * (density / DisplayMetrics.DENSITY_DEFAULT)
         }
 
         private fun drawWatchFace(canvas: Canvas) {
